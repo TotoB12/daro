@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daro - Navigation App</title>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="map"></div>
+    <div id="nav-bar">
+        <div id="search-container">
+            <button id="back-button" style="display: none;">
+                <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" alt="Back">
+            </button>
+            <input type="text" id="search-input" placeholder="Where to?">
+            <button id="search-button">
+                <img src="https://img.icons8.com/ios-filled/50/ffffff/search--v1.png" alt="Search">
+            </button>
+        </div>
+        <div id="preset-buttons">
+            <button class="preset-button">
+                <img src="https://img.icons8.com/ios-filled/50/ffffff/star--v1.png" alt="Favorites">
+                <span>Favorites</span>
+            </button>
+            <button class="preset-button">
+                <img src="https://img.icons8.com/ios-filled/50/ffffff/gas-station.png" alt="Gas">
+                <span>Gas</span>
+            </button>
+            <button class="preset-button">
+                <img src="https://img.icons8.com/ios-filled/50/ffffff/cafe.png" alt="Cafe">
+                <span>Cafe</span>
+            </button>
+            <button class="preset-button">
+                <img src="https://img.icons8.com/ios-filled/50/ffffff/restaurant.png" alt="Food">
+                <span>Food</span>
+            </button>
+            <button class="preset-button">
+                <img src="https://img.icons8.com/ios-filled/50/ffffff/parking.png" alt="Parking">
+                <span>Parking</span>
+            </button>
+        </div>
+        <div id="search-results"></div>
+    </div>
+    <div id="details-bar" style="display: none;">
+        <div id="details-content">
+            <h2 id="place-name"></h2>
+            <p id="place-text"></p>
+        </div>
+        <button id="details-back-button">
+            <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" alt="Back">
+        </button>
+    </div>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
+    <script src="script.js"></script>
+</body>
+</html>

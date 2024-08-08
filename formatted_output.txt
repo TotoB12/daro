@@ -1,0 +1,246 @@
+I am working on a simplistic and functional web navigation app. Here is the full code:
+
+index.js
+```javascript
+const express = require('express');
+const axios = require('axios');
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.use(express.static('public'));
+
+app.get('/search', async (req, res) => {
+  try {
+    const { query } = req.query;
+    const response = await axios.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json`, {
+      params: {
+        access_token: process.env.MAPBOX_ACCESS_TOKEN,
+        limit: 5
+      }
+    });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'An error occurred while searching' });
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});
+```
+
+public/index.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daro - Navigation App</title>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="map"></div>
+    <div id="nav-bar">
+        <div id="search-container">
+            <input type="text" id="search-input" placeholder="Where to?">
+            <button id="search-button">
+                <img src="https://img.icons8.com/ios-filled/50/ffffff/search--v1.png" alt="Search">
+            </button>
+        </div>
+        <div id="preset-buttons">
+            <button class="preset-button">
+                <img src="https://img.icons8.com/ios-filled/50/ffffff/star--v1.png" alt="Favorites">
+                <span>Favorites</span>
+            </button>
+            <button class="preset-button">
+                <img src="https://img.icons8.com/ios-filled/50/ffffff/gas-station.png" alt="Gas">
+                <span>Gas</span>
+            </button>
+            <button class="preset-button">
+                <img src="https://img.icons8.com/ios-filled/50/ffffff/cafe.png" alt="Cafe">
+                <span>Cafe</span>
+            </button>
+            <button class="preset-button">
+                <img src="https://img.icons8.com/ios-filled/50/ffffff/restaurant.png" alt="Food">
+                <span>Food</span>
+            </button>
+            <button class="preset-button">
+                <img src="https://img.icons8.com/ios-filled/50/ffffff/parking.png" alt="Parking">
+                <span>Parking</span>
+            </button>
+        </div>
+    </div>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
+    <script src="script.js"></script>
+</body>
+</html>
+```
+
+public/script.js
+```javascript
+mapboxgl.accessToken = 'pk.eyJ1IjoidG90b2IxMjE3IiwiYSI6ImNsbXo4NHdocjA4dnEya215cjY0aWJ1cGkifQ.OMzA6Q8VnHLHZP-P8ACBRw';
+
+const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/totob1217/cln13arba06c901ns2xacgakx',
+    center: [-74.5, 40],
+    zoom: 9
+});
+
+map.addControl(new mapboxgl.NavigationControl());
+map.addControl(new mapboxgl.GeolocateControl({
+    positionOptions: {
+        enableHighAccuracy: true
+    },
+    trackUserLocation: true
+}));
+
+const searchInput = document.getElementById('search-input');
+const searchButton = document.getElementById('search-button');
+
+searchButton.addEventListener('click', performSearch);
+searchInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        performSearch();
+    }
+});
+
+function performSearch() {
+    const query = searchInput.value;
+    if (query.trim() === '') return;
+
+    fetch(`/search?query=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.features && data.features.length > 0) {
+                const coordinates = data.features[0].center;
+                map.flyTo({
+                    center: coordinates,
+                    zoom: 14
+                });
+
+                new mapboxgl.Marker()
+                    .setLngLat(coordinates)
+                    .addTo(map);
+            } else {
+                alert('No results found');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while searching');
+        });
+}
+
+const presetButtons = document.querySelectorAll('.preset-button');
+presetButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        console.log(`${button.querySelector('span').textContent} button clicked`);
+    });
+});
+```
+
+public/styles.css
+```css
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.mapboxgl-ctrl-bottom-left .mapboxgl-ctrl-logo, .mapboxgl-ctrl-attrib {
+  display: none;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+#nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(30, 30, 30, 0.9);
+  padding: 20px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+#search-container {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+#search-input {
+  flex-grow: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 25px;
+  background-color: rgba(60, 60, 60, 0.8);
+  color: white;
+  font-size: 16px;
+}
+
+#search-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 10px;
+}
+
+#search-button img {
+  width: 24px;
+  height: 24px;
+}
+
+#preset-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.preset-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.preset-button img {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 5px;
+}
+
+.preset-button span {
+  font-size: 12px;
+}
+
+.mapboxgl-ctrl-top-right {
+  top: 10px;
+  right: 10px;
+}
+
+.mapboxgl-ctrl-group {
+  background-color: rgba(30, 30, 30, 0.8);
+  border-radius: 8px;
+}
+
+.mapboxgl-ctrl-group button {
+  width: 40px;
+  height: 40px;
+}
+
+.mapboxgl-ctrl-icon {
+  filter: invert(1);
+}
+```
+
